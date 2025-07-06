@@ -6,6 +6,8 @@ This is a simple PHP web app for tracking watched episodes from TV shows. Users 
 - Login with username/password
 - Add series and episodes
 - Mark episodes as watched with one rating and comment per user
+- Edit series details after creation
+- Mark watched episodes as unwatched again
 - Public read-only access via `view.php`
 - Uses SQLite via PDO for storage
 - Mobile friendly layout using Bootstrap
