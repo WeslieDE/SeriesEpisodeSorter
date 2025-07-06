@@ -9,7 +9,7 @@ $series = $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
 
 function episodes_for_series_public($series_id) {
     global $pdo;
-    $stmt = $pdo->prepare('SELECT e.*, w.rating, w.comment FROM episodes e LEFT JOIN watched w ON e.id = w.episode_id AND w.user_id = 1 WHERE e.series_id = ? ORDER BY season, episode');
+    $stmt = $pdo->prepare('SELECT e.*, w.rating, w.comment, w.favorite FROM episodes e LEFT JOIN watched w ON e.id = w.episode_id AND w.user_id = 1 WHERE e.series_id = ? ORDER BY season, CASE WHEN w.rating IS NOT NULL THEN w.rating ELSE e.episode END');
     $stmt->execute([$series_id]);
     return $stmt->fetchAll();
 }
@@ -46,14 +46,14 @@ function episodes_for_series_public($series_id) {
                 if ($currSeason !== null) echo "</tbody></table>";
                 $currSeason = $e['season'];
                 echo "<h4 class=\"mt-4\">Season " . htmlspecialchars($currSeason) . "</h4>";
-                $colgroup = "<colgroup><col style='width:10%'><col style='width:90%'></colgroup>";
+                $colgroup = "<colgroup><col style='width:5%'><col style='width:10%'><col style='width:85%'></colgroup>";
                 echo "<table class=\"table table-sm mb-2 episode-table\">" . $colgroup;
-                echo "<thead><tr><th>Ep.</th><th>Title</th></tr></thead><tbody>";
+                echo "<thead><tr><th></th><th>Ep.</th><th>Title</th></tr></thead><tbody>";
             endif;
-            echo "<tr><td>" . htmlspecialchars($e['episode']) . "</td><td>" . htmlspecialchars($e['title']);
+            $star = $e['favorite'] ? '&#9733;' : '';
+            echo "<tr><td style='color:gold'>" . $star . "</td><td>" . htmlspecialchars($e['episode']) . "</td><td>" . htmlspecialchars($e['title']);
             if ($e['comment']):
                 echo "<div class=\"small fst-italic\">" . htmlspecialchars($e['comment']);
-                if ($e['rating']) echo " (Rating: " . htmlspecialchars($e['rating']) . ")";
                 echo "</div>";
             endif;
             echo "</td></tr>";

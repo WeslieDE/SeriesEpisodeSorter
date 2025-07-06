@@ -83,19 +83,40 @@ if (isset($_POST['action'])) {
                 }
             }
             break;
-        case 'mark_watched':
-            if ($u = current_user()) {
-                if (!empty($_POST['episode_id'])) {
-                    $stmt = $pdo->prepare('REPLACE INTO watched(user_id, episode_id, watched, rating, comment) VALUES(?, ?, 1, ?, ?)');
-                    $stmt->execute([$u['id'], $_POST['episode_id'], $_POST['rating'] ?? null, $_POST['comment'] ?? null]);
-                }
-            }
-            break;
+       case 'mark_watched':
+           if ($u = current_user()) {
+               if (!empty($_POST['episode_id'])) {
+                    $stmt = $pdo->prepare('SELECT MAX(rating) FROM watched WHERE user_id = ?');
+                    $stmt->execute([$u['id']]);
+                    $max = (int)$stmt->fetchColumn();
+                    $rating = $max + 1;
+                    $stmt = $pdo->prepare('REPLACE INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 1, ?, ?, 0)');
+                    $stmt->execute([$u['id'], $_POST['episode_id'], $rating, $_POST['comment'] ?? null]);
+               }
+           }
+           break;
         case 'mark_unwatched':
             if ($u = current_user()) {
                 if (!empty($_POST['episode_id'])) {
                     $stmt = $pdo->prepare('DELETE FROM watched WHERE user_id = ? AND episode_id = ?');
                     $stmt->execute([$u['id'], $_POST['episode_id']]);
+                }
+            }
+            break;
+        case 'toggle_favorite':
+            if ($u = current_user()) {
+                if (!empty($_POST['episode_id'])) {
+                    $stmt = $pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
+                    $stmt->execute([$u['id'], $_POST['episode_id']]);
+                    $fav = $stmt->fetchColumn();
+                    if ($fav === false) {
+                        $ins = $pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 0, NULL, NULL, 1)');
+                        $ins->execute([$u['id'], $_POST['episode_id']]);
+                    } else {
+                        $newFav = $fav ? 0 : 1;
+                        $upd = $pdo->prepare('UPDATE watched SET favorite = ? WHERE user_id = ? AND episode_id = ?');
+                        $upd->execute([$newFav, $u['id'], $_POST['episode_id']]);
+                    }
                 }
             }
             break;
@@ -122,10 +143,11 @@ if (!$series) {
 function episodes_for_series_user($series_id, $uid) {
     global $pdo;
     $stmt = $pdo->prepare(
-        "SELECT e.*, IFNULL(w.watched,0) as watched, w.rating, w.comment
+        "SELECT e.*, IFNULL(w.watched,0) as watched, w.rating, w.comment, w.favorite
          FROM episodes e LEFT JOIN watched w
          ON e.id = w.episode_id AND w.user_id = ?
-         WHERE e.series_id = ? ORDER BY season, episode"
+         WHERE e.series_id = ?
+         ORDER BY e.season, CASE WHEN w.rating IS NOT NULL THEN w.rating ELSE e.episode END"
     );
     $stmt->execute([$uid, $series_id]);
     return $stmt->fetchAll();
@@ -151,6 +173,7 @@ function episodes_for_series($series_id) {
     <div class="d-flex ms-auto">
       <a class="btn btn-outline-primary me-2" href="view.php">Public View</a>
       <?php if ($user): ?>
+      <a class="btn btn-outline-secondary me-2" href="favorites.php">Favorites</a>
       <a class="btn btn-outline-secondary me-2" href="config_page.php">Config</a>
       <form method="post" class="d-flex">
         <input type="hidden" name="action" value="logout">
@@ -220,16 +243,25 @@ function episodes_for_series($series_id) {
                 endif;
                 $currentSeason = $e['season'];
                 echo "<h4 class=\"mt-4\">Season " . htmlspecialchars($currentSeason) . "</h4>";
-                $colgroup = "<colgroup><col style='width:10%'>";
-                $colgroup .= "<col style='width:" . ($user ? "60%" : "90%") . "'>";
+                $colgroup = "<colgroup><col style='width:5%'><col style='width:10%'>";
+                $colgroup .= "<col style='width:" . ($user ? "55%" : "85%") . "'>";
                 if ($user) $colgroup .= "<col style='width:30%'>";
                 $colgroup .= "</colgroup>";
                 echo "<table class=\"table table-sm mb-2 episode-table\">" . $colgroup;
-                echo "<thead><tr><th>Ep.</th><th>Title</th>";
+                echo "<thead><tr><th></th><th>Ep.</th><th>Title</th>";
                 if ($user) echo "<th>Actions</th>";
                 echo "</tr></thead><tbody>";
             endif;
-            echo "<tr>";
+            echo "<tr data-id='" . $e['id'] . "'>";
+            echo "<td>";
+            echo "<form method='post' class='d-inline'>";
+            echo "<input type='hidden' name='action' value='toggle_favorite'>";
+            echo "<input type='hidden' name='episode_id' value='" . $e['id'] . "'>";
+            $star = $e['favorite'] ? '&#9733;' : '&#9734;';
+            $color = $e['favorite'] ? 'gold' : '#ccc';
+            echo "<button class='btn btn-link p-0 border-0' style='color:$color'>$star</button>";
+            echo "</form>";
+            echo "</td>";
             echo "<td>" . htmlspecialchars($e['episode']) . "</td>";
             echo "<td>" . htmlspecialchars($e['title']) . "</td>";
             if ($user):
@@ -245,15 +277,12 @@ function episodes_for_series($series_id) {
                     echo "<form method=\"post\" class=\"row gx-1 gy-1 align-items-center\">";
                     echo "<input type=\"hidden\" name=\"action\" value=\"mark_watched\">";
                     echo "<input type=\"hidden\" name=\"episode_id\" value=\"" . $e['id'] . "\">";
-                    echo "<div class=\"col-auto\"><input name=\"rating\" type=\"number\" min=\"1\" max=\"5\" class=\"form-control form-control-sm\" placeholder=\"Rating\" style=\"width:80px\"></div>";
                     echo "<div class=\"col\"><input name=\"comment\" class=\"form-control form-control-sm\" placeholder=\"Comment\"></div>";
                     echo "<div class=\"col-auto\"><button class=\"btn btn-sm btn-primary\">Watch</button></div>";
                     echo "</form>";
                 endif;
                 if ($e['comment']):
-                    echo "<div class=\"small fst-italic\">" . htmlspecialchars($e['comment']);
-                    if ($e['rating']) echo " (Rating: " . htmlspecialchars($e['rating']) . ")";
-                    echo "</div>";
+                    echo "<div class=\"small fst-italic\">" . htmlspecialchars($e['comment']) . "</div>";
                 endif;
                 echo "</td>";
             endif;
@@ -264,5 +293,21 @@ function episodes_for_series($series_id) {
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.querySelectorAll('.episode-table tbody').forEach(function(tb){
+  new Sortable(tb, {
+    animation: 150,
+    onEnd: function(){
+      const order = Array.from(tb.children).map(tr => tr.dataset.id);
+      fetch('reorder.php', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({order})
+      });
+    }
+  });
+});
+</script>
 </body>
 </html>
