@@ -80,11 +80,31 @@ if (isset($_POST['action'])) {
                 }
             }
             break;
+        case 'update_series':
+            if ($u = current_user()) {
+                if (!empty($_POST['series_id']) && !empty($_POST['title'])) {
+                    $stmt = $pdo->prepare('UPDATE series SET title = ?, description = ? WHERE id = ?');
+                    $stmt->execute([
+                        $_POST['title'],
+                        $_POST['description'] ?? null,
+                        $_POST['series_id']
+                    ]);
+                }
+            }
+            break;
         case 'mark_watched':
             if ($u = current_user()) {
                 if (!empty($_POST['episode_id'])) {
                     $stmt = $pdo->prepare('REPLACE INTO watched(user_id, episode_id, watched, rating, comment) VALUES(?, ?, 1, ?, ?)');
                     $stmt->execute([$u['id'], $_POST['episode_id'], $_POST['rating'] ?? null, $_POST['comment'] ?? null]);
+                }
+            }
+            break;
+        case 'mark_unwatched':
+            if ($u = current_user()) {
+                if (!empty($_POST['episode_id'])) {
+                    $stmt = $pdo->prepare('DELETE FROM watched WHERE user_id = ? AND episode_id = ?');
+                    $stmt->execute([$u['id'], $_POST['episode_id']]);
                 }
             }
             break;
@@ -171,6 +191,14 @@ function episodes_for_series($series_id) {
 <div class="card-body">
 <p><?= nl2br(htmlspecialchars($s['description'])) ?></p>
 <?php if ($user): ?>
+<h4>Edit Series</h4>
+<form method="post" class="mb-3">
+    <input type="hidden" name="action" value="update_series">
+    <input type="hidden" name="series_id" value="<?= $s['id'] ?>">
+    <input name="title" value="<?= htmlspecialchars($s['title']) ?>" class="form-control mb-1">
+    <textarea name="description" class="form-control mb-1"><?= htmlspecialchars($s['description']) ?></textarea>
+    <button class="btn btn-primary">Save</button>
+</form>
 <h4>Add Episode</h4>
 <form method="post" class="mb-3">
     <input type="hidden" name="action" value="add_episode">
@@ -188,6 +216,11 @@ function episodes_for_series($series_id) {
 <?php if ($user): ?>
     <?php if ($e['watched']): ?>
     <span class="badge bg-success">Watched</span>
+    <form method="post" style="display:inline">
+        <input type="hidden" name="action" value="mark_unwatched">
+        <input type="hidden" name="episode_id" value="<?= $e['id'] ?>">
+        <button class="btn btn-sm btn-warning">Mark Unwatched</button>
+    </form>
     <?php else: ?>
     <form method="post" style="display:inline">
         <input type="hidden" name="action" value="mark_watched">
