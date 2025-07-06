@@ -18,3 +18,14 @@ This is a simple PHP web app for tracking watched episodes from TV shows. Users 
 4. Register the first user account. Subsequent registrations are disabled.
 
 This project is a minimal prototype and lacks many advanced features like WebSockets and admin panels.
+
+## Docker
+
+The application can also run inside a container. Build the image and start a container with Docker:
+
+```bash
+docker build -t series-episode-sorter .
+docker run -p 8080:80 series-episode-sorter
+```
+
+Open `http://localhost:8080` in your browser. The SQLite database will be created in `/var/www/html/data` inside the container.
