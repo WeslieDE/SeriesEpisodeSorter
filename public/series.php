@@ -11,6 +11,9 @@ if ($newDb) {
 }
 
 session_start();
+if (!isset($_SESSION['edit_mode'])) {
+    $_SESSION['edit_mode'] = false;
+}
 
 function current_user() {
     global $pdo;
@@ -30,6 +33,9 @@ if (isset($_POST['action'])) {
             session_destroy();
             header('Location: index.php');
             exit;
+        case 'toggle_edit_mode':
+            $_SESSION['edit_mode'] = !($_SESSION['edit_mode'] ?? false);
+            break;
         case 'update_series':
             if ($u = current_user()) {
                 if (!empty($_POST['series_id']) && !empty($_POST['title'])) {
@@ -91,6 +97,7 @@ if (isset($_POST['action'])) {
 }
 
 $user = current_user();
+$edit_mode = $_SESSION['edit_mode'] ?? false;
 
 $series_id = $_GET['id'] ?? $_POST['series_id'] ?? null;
 if (!$series_id) {
@@ -160,6 +167,14 @@ function episodes_for_series($series_id) {
   <div class="card-body">
     <p><?= nl2br(htmlspecialchars($series['description'])) ?></p>
     <?php if ($user): ?>
+    <form method="post" class="mb-3">
+        <input type="hidden" name="action" value="toggle_edit_mode">
+        <input type="hidden" name="series_id" value="<?= $series['id'] ?>">
+        <button class="btn btn-outline-secondary">
+            <?= $edit_mode ? 'Bearbeiten beenden' : 'Bearbeiten' ?>
+        </button>
+    </form>
+    <?php if ($edit_mode): ?>
     <h4>Edit Series</h4>
     <form method="post" class="mb-3">
         <input type="hidden" name="action" value="update_series">
@@ -185,6 +200,7 @@ function episodes_for_series($series_id) {
         <input name="count" placeholder="Episode Count" class="form-control mb-1">
         <button class="btn btn-success">Add Episodes</button>
     </form>
+    <?php endif; ?>
     <?php endif; ?>
     <?php
         $episodes = episodes_for_series($series['id']);
