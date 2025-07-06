@@ -141,6 +141,7 @@ function episodes_for_series($series_id) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <title><?= htmlspecialchars($config['site_title']) ?> - <?= htmlspecialchars($series['title']) ?></title>
 </head>
 <body class="container py-4">
@@ -219,7 +220,11 @@ function episodes_for_series($series_id) {
                 endif;
                 $currentSeason = $e['season'];
                 echo "<h4 class=\"mt-4\">Season " . htmlspecialchars($currentSeason) . "</h4>";
-                echo "<table class=\"table table-sm mb-2\">";
+                $colgroup = "<colgroup><col style='width:10%'>";
+                $colgroup .= "<col style='width:" . ($user ? "60%" : "90%") . "'>";
+                if ($user) $colgroup .= "<col style='width:30%'>";
+                $colgroup .= "</colgroup>";
+                echo "<table class=\"table table-sm mb-2 episode-table\">" . $colgroup;
                 echo "<thead><tr><th>Ep.</th><th>Title</th>";
                 if ($user) echo "<th>Actions</th>";
                 echo "</tr></thead><tbody>";
