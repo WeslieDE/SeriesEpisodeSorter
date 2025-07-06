@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="manifest" href="/manifest.json">
+<title>Series Episode Sorter</title>
+</head>
+<body class="container py-4">
+<div class="mb-3">
+{% if user %}
+<form method="post" style="display:inline">
+    <input type="hidden" name="action" value="logout">
+    <button class="btn btn-secondary">Logout</button>
+</form>
+{% else %}
+    {% if user_count == 0 %}
+    <h2>Register</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="register">
+        <input name="username" placeholder="Username" class="form-control mb-1">
+        <input name="password" type="password" placeholder="Password" class="form-control mb-1">
+        <button class="btn btn-primary">Register</button>
+    </form>
+    {% endif %}
+    <h2>Login</h2>
+    <form method="post">
+        <input type="hidden" name="action" value="login">
+        <input name="username" placeholder="Username" class="form-control mb-1">
+        <input name="password" type="password" placeholder="Password" class="form-control mb-1">
+        <button class="btn btn-primary">Login</button>
+    </form>
+{% endif %}
+</div>
+{% if message %}
+<div class="alert alert-warning">{{ message|e }}</div>
+{% endif %}
+{% if user %}
+<h2>Add Series</h2>
+<form method="post" class="mb-3">
+    <input type="hidden" name="action" value="add_series">
+    <input name="title" placeholder="Title" class="form-control mb-1">
+    <textarea name="description" placeholder="Description" class="form-control mb-1"></textarea>
+    <button class="btn btn-success">Add Series</button>
+</form>
+{% endif %}
+{% for s in series %}
+<div class="card mb-3">
+<div class="card-header"><h3>{{ s.title|e }}</h3></div>
+<div class="card-body">
+<p>{{ s.description|default('')|e|nl2br }}</p>
+{% if user %}
+<h4>Add Episode</h4>
+<form method="post" class="mb-3">
+    <input type="hidden" name="action" value="add_episode">
+    <input type="hidden" name="series_id" value="{{ s.id }}">
+    <input name="season" placeholder="Season" class="form-control mb-1">
+    <input name="episode" placeholder="Episode" class="form-control mb-1">
+    <input name="title" placeholder="Title" class="form-control mb-1">
+    <button class="btn btn-success">Add Episode</button>
+</form>
+{% endif %}
+<ul class="list-group">
+{% for e in s.episodes %}
+<li class="list-group-item">
+<strong>S{{ e.season }}E{{ e.episode }}:</strong> {{ e.title|e }}
+{% if user %}
+    {% if e.watched %}
+    <span class="badge bg-success">Watched</span>
+    {% else %}
+    <form method="post" style="display:inline">
+        <input type="hidden" name="action" value="mark_watched">
+        <input type="hidden" name="episode_id" value="{{ e.id }}">
+        <input name="rating" type="number" min="1" max="5" placeholder="Rating" style="width:80px">
+        <input name="comment" placeholder="Comment">
+        <button class="btn btn-sm btn-primary">Mark Watched</button>
+    </form>
+    {% endif %}
+    {% if e.comment %}
+    <div><em>{{ e.comment|e }}</em> (Rating: {{ e.rating|e }})</div>
+    {% endif %}
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</div>
+</div>
+{% endfor %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
