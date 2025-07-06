@@ -1,0 +1,9 @@
+.episode-table {
+  table-layout: fixed;
+  width: 100%;
+}
+.episode-table td,
+.episode-table th {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}

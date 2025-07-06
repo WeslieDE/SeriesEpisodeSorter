@@ -20,6 +20,7 @@ function episodes_for_series_public($series_id) {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
 <title><?= htmlspecialchars($config['site_title']) ?> - Public</title>
 </head>
 <body class="container py-4">
@@ -45,7 +46,8 @@ function episodes_for_series_public($series_id) {
                 if ($currSeason !== null) echo "</tbody></table>";
                 $currSeason = $e['season'];
                 echo "<h4 class=\"mt-4\">Season " . htmlspecialchars($currSeason) . "</h4>";
-                echo "<table class=\"table table-sm mb-2\">";
+                $colgroup = "<colgroup><col style='width:10%'><col style='width:90%'></colgroup>";
+                echo "<table class=\"table table-sm mb-2 episode-table\">" . $colgroup;
                 echo "<thead><tr><th>Ep.</th><th>Title</th></tr></thead><tbody>";
             endif;
             echo "<tr><td>" . htmlspecialchars($e['episode']) . "</td><td>" . htmlspecialchars($e['title']);
