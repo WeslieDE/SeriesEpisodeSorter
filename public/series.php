@@ -186,34 +186,53 @@ function episodes_for_series($series_id) {
         <button class="btn btn-success">Add Episodes</button>
     </form>
     <?php endif; ?>
-    <ul class="list-group">
-    <?php foreach (episodes_for_series($series['id']) as $e): ?>
-      <li class="list-group-item">
-        <strong>S<?= $e['season'] ?>E<?= $e['episode'] ?>:</strong> <?= htmlspecialchars($e['title']) ?>
-        <?php if ($user): ?>
-            <?php if ($e['watched']): ?>
-            <span class="badge bg-success">Watched</span>
-            <form method="post" style="display:inline">
-                <input type="hidden" name="action" value="mark_unwatched">
-                <input type="hidden" name="episode_id" value="<?= $e['id'] ?>">
-                <button class="btn btn-sm btn-warning">Mark Unwatched</button>
-            </form>
-            <?php else: ?>
-            <form method="post" style="display:inline">
-                <input type="hidden" name="action" value="mark_watched">
-                <input type="hidden" name="episode_id" value="<?= $e['id'] ?>">
-                <input name="rating" type="number" min="1" max="5" placeholder="Rating" style="width:80px">
-                <input name="comment" placeholder="Comment">
-                <button class="btn btn-sm btn-primary">Mark Watched</button>
-            </form>
-            <?php endif; ?>
-            <?php if ($e['comment']): ?>
-            <div><em><?= htmlspecialchars($e['comment']) ?></em> (Rating: <?= htmlspecialchars($e['rating']) ?>)</div>
-            <?php endif; ?>
-        <?php endif; ?>
-      </li>
-    <?php endforeach; ?>
-    </ul>
+    <?php
+        $episodes = episodes_for_series($series['id']);
+        $currentSeason = null;
+        foreach ($episodes as $e):
+            if ($e['season'] !== $currentSeason):
+                if ($currentSeason !== null):
+                    echo "</tbody></table>";
+                endif;
+                $currentSeason = $e['season'];
+                echo "<h4 class=\"mt-4\">Season " . htmlspecialchars($currentSeason) . "</h4>";
+                echo "<table class=\"table table-sm mb-2\">";
+                echo "<thead><tr><th>Ep.</th><th>Title</th>";
+                if ($user) echo "<th>Actions</th>";
+                echo "</tr></thead><tbody>";
+            endif;
+            echo "<tr>";
+            echo "<td>" . htmlspecialchars($e['episode']) . "</td>";
+            echo "<td>" . htmlspecialchars($e['title']) . "</td>";
+            if ($user):
+                echo "<td>";
+                if ($e['watched']):
+                    echo "<span class=\"badge bg-success me-1\">Watched</span>";
+                    echo "<form method=\"post\" class=\"d-inline\">";
+                    echo "<input type=\"hidden\" name=\"action\" value=\"mark_unwatched\">";
+                    echo "<input type=\"hidden\" name=\"episode_id\" value=\"" . $e['id'] . "\">";
+                    echo "<button class=\"btn btn-sm btn-warning\">Unwatch</button>";
+                    echo "</form>";
+                else:
+                    echo "<form method=\"post\" class=\"row gx-1 gy-1 align-items-center\">";
+                    echo "<input type=\"hidden\" name=\"action\" value=\"mark_watched\">";
+                    echo "<input type=\"hidden\" name=\"episode_id\" value=\"" . $e['id'] . "\">";
+                    echo "<div class=\"col-auto\"><input name=\"rating\" type=\"number\" min=\"1\" max=\"5\" class=\"form-control form-control-sm\" placeholder=\"Rating\" style=\"width:80px\"></div>";
+                    echo "<div class=\"col\"><input name=\"comment\" class=\"form-control form-control-sm\" placeholder=\"Comment\"></div>";
+                    echo "<div class=\"col-auto\"><button class=\"btn btn-sm btn-primary\">Watch</button></div>";
+                    echo "</form>";
+                endif;
+                if ($e['comment']):
+                    echo "<div class=\"small fst-italic\">" . htmlspecialchars($e['comment']);
+                    if ($e['rating']) echo " (Rating: " . htmlspecialchars($e['rating']) . ")";
+                    echo "</div>";
+                endif;
+                echo "</td>";
+            endif;
+            echo "</tr>";
+        endforeach;
+        if ($currentSeason !== null) echo "</tbody></table>";
+    ?>
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
