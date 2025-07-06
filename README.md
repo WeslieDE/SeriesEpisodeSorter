@@ -21,6 +21,12 @@ This is a simple PHP web app for tracking watched episodes from TV shows. Users 
 4. Register the first user account. Subsequent registrations are disabled.
 5. View the read-only list at `view.php` to share your progress.
 
+### Configuration
+
+Basic settings live in `config.php`. Here you can adjust the title shown in the
+navigation bar and HTML `<title>` tags, switch the database driver, set the
+language and provide API keys for external services.
+
 This project is a minimal prototype and lacks many advanced features like WebSockets and admin panels.
 
 ## Docker
