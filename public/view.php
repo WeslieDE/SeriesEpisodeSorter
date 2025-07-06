@@ -37,16 +37,27 @@ function episodes_for_series_public($series_id) {
   <div class="card-header"><h3><?= htmlspecialchars($s['title']) ?></h3></div>
   <div class="card-body">
     <p><?= nl2br(htmlspecialchars($s['description'])) ?></p>
-    <ul class="list-group">
-      <?php foreach (episodes_for_series_public($s['id']) as $e): ?>
-      <li class="list-group-item">
-        <strong>S<?= $e['season'] ?>E<?= $e['episode'] ?>:</strong> <?= htmlspecialchars($e['title']) ?>
-        <?php if ($e['comment']): ?>
-        <div><em><?= htmlspecialchars($e['comment']) ?></em> (Rating: <?= htmlspecialchars($e['rating']) ?>)</div>
-        <?php endif; ?>
-      </li>
-      <?php endforeach; ?>
-    </ul>
+    <?php
+        $episodes = episodes_for_series_public($s['id']);
+        $currSeason = null;
+        foreach ($episodes as $e):
+            if ($e['season'] !== $currSeason):
+                if ($currSeason !== null) echo "</tbody></table>";
+                $currSeason = $e['season'];
+                echo "<h4 class=\"mt-4\">Season " . htmlspecialchars($currSeason) . "</h4>";
+                echo "<table class=\"table table-sm mb-2\">";
+                echo "<thead><tr><th>Ep.</th><th>Title</th></tr></thead><tbody>";
+            endif;
+            echo "<tr><td>" . htmlspecialchars($e['episode']) . "</td><td>" . htmlspecialchars($e['title']);
+            if ($e['comment']):
+                echo "<div class=\"small fst-italic\">" . htmlspecialchars($e['comment']);
+                if ($e['rating']) echo " (Rating: " . htmlspecialchars($e['rating']) . ")";
+                echo "</div>";
+            endif;
+            echo "</td></tr>";
+        endforeach;
+        if ($currSeason !== null) echo "</tbody></table>";
+    ?>
   </div>
 </div>
 <?php endforeach; ?>
