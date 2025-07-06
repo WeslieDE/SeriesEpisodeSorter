@@ -18,6 +18,9 @@ This is a simple PHP web app for tracking watched episodes from TV shows. Users 
 4. Register the first user account. Subsequent registrations are disabled.
 
 This project is a minimal prototype and lacks many advanced features like WebSockets and admin panels.
+It now uses the [Twig](https://twig.symfony.com/) template engine so the HTML
+templates live in the `templates/` directory. If the `vendor/` folder is not
+present you can install the dependencies with `composer install`.
 
 ## Docker
 
