@@ -150,6 +150,7 @@ function episodes_for_series($series_id) {
     <div class="d-flex ms-auto">
       <a class="btn btn-outline-primary me-2" href="view.php">Public View</a>
       <?php if ($user): ?>
+      <a class="btn btn-outline-secondary me-2" href="config_page.php">Config</a>
       <form method="post" class="d-flex">
         <input type="hidden" name="action" value="logout">
         <button class="btn btn-secondary">Logout</button>

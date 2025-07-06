@@ -33,6 +33,10 @@ Basic settings live in `config.php`. Here you can adjust the title shown in the
 navigation bar and HTML `<title>` tags, switch the database driver, set the
 language and provide API keys for external services.
 
+When logged in you can open **Config** from the navigation bar to edit these
+settings through the browser. Saving regenerates `config.php` and will fail if
+the file is not writable.
+
 This project is a minimal prototype and lacks many advanced features like WebSockets and admin panels.
 
 ## Docker
