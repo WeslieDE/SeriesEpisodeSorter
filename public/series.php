@@ -44,14 +44,30 @@ if (isset($_POST['action'])) {
             break;
         case 'add_episode':
             if ($u = current_user()) {
-                if (!empty($_POST['series_id']) && !empty($_POST['title'])) {
+                if (!empty($_POST['series_id'])) {
                     $stmt = $pdo->prepare('INSERT INTO episodes(series_id, season, episode, title) VALUES(?, ?, ?, ?)');
                     $stmt->execute([
                         $_POST['series_id'],
                         $_POST['season'] ?? null,
                         $_POST['episode'] ?? null,
-                        $_POST['title']
+                        $_POST['title'] ?? ''
                     ]);
+                }
+            }
+            break;
+        case 'bulk_add_episodes':
+            if ($u = current_user()) {
+                if (!empty($_POST['series_id']) && isset($_POST['season']) && isset($_POST['count'])) {
+                    $seriesId = (int)$_POST['series_id'];
+                    $season = (int)$_POST['season'];
+                    $count = max(0, (int)$_POST['count']);
+                    $stmt = $pdo->prepare('SELECT MAX(episode) FROM episodes WHERE series_id = ? AND season = ?');
+                    $stmt->execute([$seriesId, $season]);
+                    $start = (int)$stmt->fetchColumn() + 1;
+                    $ins = $pdo->prepare('INSERT INTO episodes(series_id, season, episode, title) VALUES(?, ?, ?, ?)');
+                    for ($i = 0; $i < $count; $i++) {
+                        $ins->execute([$seriesId, $season, $start + $i, '']);
+                    }
                 }
             }
             break;
@@ -160,6 +176,14 @@ function episodes_for_series($series_id) {
         <input name="episode" placeholder="Episode" class="form-control mb-1">
         <input name="title" placeholder="Title" class="form-control mb-1">
         <button class="btn btn-success">Add Episode</button>
+    </form>
+    <h4>Add Season with Multiple Episodes</h4>
+    <form method="post" class="mb-3">
+        <input type="hidden" name="action" value="bulk_add_episodes">
+        <input type="hidden" name="series_id" value="<?= $series['id'] ?>">
+        <input name="season" placeholder="Season" class="form-control mb-1">
+        <input name="count" placeholder="Episode Count" class="form-control mb-1">
+        <button class="btn btn-success">Add Episodes</button>
     </form>
     <?php endif; ?>
     <ul class="list-group">
