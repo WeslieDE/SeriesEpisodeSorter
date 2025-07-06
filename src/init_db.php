@@ -26,6 +26,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS watched (
     watched INTEGER DEFAULT 0,
     rating INTEGER,
     comment TEXT,
+    favorite INTEGER DEFAULT 0,
     PRIMARY KEY(user_id, episode_id),
     FOREIGN KEY(user_id) REFERENCES users(id),
     FOREIGN KEY(episode_id) REFERENCES episodes(id)

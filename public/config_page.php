@@ -82,6 +82,7 @@ if (isset($_POST['action'])) {
     <a class="navbar-brand" href="index.php"><?= htmlspecialchars($config['site_title']) ?></a>
     <div class="d-flex ms-auto">
       <a class="btn btn-outline-primary me-2" href="view.php">Public View</a>
+      <a class="btn btn-outline-secondary me-2" href="favorites.php">Favorites</a>
       <a class="btn btn-outline-secondary me-2" href="config_page.php">Config</a>
       <form method="post" class="d-flex">
         <input type="hidden" name="action" value="logout">
