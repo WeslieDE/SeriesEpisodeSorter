@@ -1,2 +1,20 @@
 # SeriesEpisodeSorter
-This is a simple web app that allows you to create a list of watched episodes from series and mark episodes as watched. You can also sort them in your favorite order.
+
+This is a simple PHP web app for tracking watched episodes from TV shows. Users can create series and episodes, mark them as watched and add ratings or comments. The first user to register becomes the only account; further registrations are disabled.
+
+## Features
+- Login with username/password
+- Add series and episodes
+- Mark episodes as watched with one rating and comment per user
+- Optional public read-only access (not implemented yet)
+- Uses SQLite via PDO for storage
+- Mobile friendly layout using Bootstrap
+- Basic PWA manifest and service worker
+
+## Setup
+1. Install PHP 8 with SQLite support.
+2. Place the contents of the `public/` directory in your web root.
+3. Access `index.php` in your browser. On first visit the database will be created automatically.
+4. Register the first user account. Subsequent registrations are disabled.
+
+This project is a minimal prototype and lacks many advanced features like WebSockets and admin panels.
