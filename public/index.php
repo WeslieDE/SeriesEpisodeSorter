@@ -95,16 +95,20 @@ $user = current_user();
 
 $series = $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
 
-function episodes_for_series($series_id) {
+function episodes_for_series_user($series_id, $uid) {
     global $pdo;
     $stmt = $pdo->prepare(
-        'SELECT e.*, IFNULL(w.watched,0) as watched, w.rating, w.comment
+        "SELECT e.*, IFNULL(w.watched,0) as watched, w.rating, w.comment
          FROM episodes e LEFT JOIN watched w
          ON e.id = w.episode_id AND w.user_id = ?
-         WHERE e.series_id = ? ORDER BY season, episode'
+         WHERE e.series_id = ? ORDER BY season, episode"
     );
-    $stmt->execute([$_SESSION['user_id'] ?? 0, $series_id]);
+    $stmt->execute([$uid, $series_id]);
     return $stmt->fetchAll();
+}
+
+function episodes_for_series($series_id) {
+    return episodes_for_series_user($series_id, $_SESSION['user_id'] ?? 0);
 }
 ?>
 <!DOCTYPE html>
@@ -117,31 +121,38 @@ function episodes_for_series($series_id) {
 <title>Series Episode Sorter</title>
 </head>
 <body class="container py-4">
+<nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="index.php">EpisodeSorter</a>
+    <div class="d-flex ms-auto">
+      <a class="btn btn-outline-primary me-2" href="view.php">Public View</a>
+      <?php if ($user): ?>
+      <form method="post" class="d-flex">
+        <input type="hidden" name="action" value="logout">
+        <button class="btn btn-secondary">Logout</button>
+      </form>
+      <?php else: ?>
+      <form method="post" class="d-flex">
+        <input type="hidden" name="action" value="login">
+        <input name="username" placeholder="Username" class="form-control me-1">
+        <input name="password" type="password" placeholder="Password" class="form-control me-1">
+        <button class="btn btn-primary">Login</button>
+      </form>
+      <?php endif; ?>
+    </div>
+  </div>
+</nav>
+<?php if (!$user && user_count() == 0): ?>
 <div class="mb-3">
-<?php if ($user): ?>
-<form method="post" style="display:inline">
-    <input type="hidden" name="action" value="logout">
-    <button class="btn btn-secondary">Logout</button>
-</form>
-<?php else: ?>
-<?php if (user_count() == 0): ?>
-<h2>Register</h2>
-<form method="post">
+  <h2>Register</h2>
+  <form method="post">
     <input type="hidden" name="action" value="register">
     <input name="username" placeholder="Username" class="form-control mb-1">
     <input name="password" type="password" placeholder="Password" class="form-control mb-1">
     <button class="btn btn-primary">Register</button>
-</form>
-<?php endif; ?>
-<h2>Login</h2>
-<form method="post">
-    <input type="hidden" name="action" value="login">
-    <input name="username" placeholder="Username" class="form-control mb-1">
-    <input name="password" type="password" placeholder="Password" class="form-control mb-1">
-    <button class="btn btn-primary">Login</button>
-</form>
-<?php endif; ?>
+  </form>
 </div>
+<?php endif; ?>
 <?php if ($message): ?>
 <div class="alert alert-warning"><?= htmlspecialchars($message) ?></div>
 <?php endif; ?>
