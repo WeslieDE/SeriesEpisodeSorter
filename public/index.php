@@ -1,13 +1,13 @@
 <?php
 require_once __DIR__ . '/../vendor/autoload.php';
+$dbFile = __DIR__ . '/../data/app.db';
+if (!is_dir(dirname($dbFile))) {
+    mkdir(dirname($dbFile), 0777, true);
+}
+$newDb = !file_exists($dbFile);
 require_once __DIR__ . '/../src/db.php';
-
 $pdo = Database::getConnection();
-
-if (!file_exists(__DIR__ . '/../data/app.db')) {
-    if (!is_dir(__DIR__ . '/../data')) {
-        mkdir(__DIR__ . '/../data', 0777, true);
-    }
+if ($newDb) {
     require __DIR__ . '/../src/init_db.php';
 }
 
