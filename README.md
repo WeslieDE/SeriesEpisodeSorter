@@ -10,7 +10,6 @@ This is a simple PHP web app for tracking watched episodes from TV shows. Users 
 - Edit series details after creation
 - Mark watched episodes as unwatched again
 - List all series on the home page with links to a detail view
-- Public read-only access via `view.php`
 - Uses SQLite via PDO for storage
 - Mobile friendly layout using Bootstrap
 - Navigation menu with login and logout
@@ -25,7 +24,6 @@ On the series detail page you can create an entire season at once. Enter the sea
 2. Place the contents of the `public/` directory in your web root.
 3. Access `index.php` in your browser. On first visit the database will be created automatically.
 4. Register the first user account. Subsequent registrations are disabled.
-5. View the read-only list at `view.php` to share your progress.
 
 ### Configuration
 
