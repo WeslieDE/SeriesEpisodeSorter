@@ -28,7 +28,7 @@ On the series detail page you can create an entire season at once. Enter the sea
 
 ### Configuration
 
-Basic settings live in `config.php`. Here you can adjust the title shown in the navigation bar and HTML `<title>` tags, set the language and provide API keys for external services. Set `require_login` to hide all pages from unauthenticated visitors.
+Basic settings live in `config.php`. Here you can adjust the title shown in the navigation bar and HTML `<title>` tags, set the language and provide API keys for external services. Set `require_login` to hide all pages from unauthenticated visitors. Use the **IMDb (OMDb) API Key** field on the config page to enable importing series information from IMDb.
 
 When logged in you can open **Config** from the navigation bar to edit these
 settings through the browser. Saving regenerates `config.php` and will fail if

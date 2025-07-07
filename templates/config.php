@@ -18,9 +18,16 @@
     <label class="form-label">SQLite Path</label>
     <input name="db_sqlite" class="form-control" value="<?= htmlspecialchars($config['db']['sqlite']) ?>">
   </div>
-  <h4>API Keys (JSON)</h4>
+
+  <h4>API Keys</h4>
   <div class="mb-3">
-    <textarea name="api_keys_json" rows="5" class="form-control"><?= htmlspecialchars(json_encode($config['api_keys'], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) ?></textarea>
+    <label class="form-label">IMDb (OMDb) API Key</label>
+    <input name="omdb_api_key" class="form-control" value="<?= htmlspecialchars($config['api_keys']['omdb'] ?? '') ?>">
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Other API Keys (JSON)</label>
+    <?php $otherKeys = $config['api_keys']; unset($otherKeys['omdb']); ?>
+    <textarea name="api_keys_json" rows="5" class="form-control"><?= htmlspecialchars(json_encode($otherKeys, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) ?></textarea>
   </div>
   <button class="btn btn-primary">Save</button>
 </form>
