@@ -78,8 +78,8 @@ if (isset($_POST['action'])) {
 }
 
 $user = current_user();
-
-$series = $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
+$login_required = ($config['require_login'] ?? false) && !$user && user_count() > 0;
+$series = $login_required ? [] : $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
 ?>
 <!DOCTYPE html>
 <html>
@@ -127,6 +127,9 @@ $series = $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
 <?php endif; ?>
 <?php if ($message): ?>
 <div class="alert alert-warning"><?= htmlspecialchars($message) ?></div>
+<?php endif; ?>
+<?php if ($login_required): ?>
+<div class="alert alert-info">Please log in to view this page.</div>
 <?php endif; ?>
 <?php if ($user): ?>
 <h2>Add Series</h2>
