@@ -124,6 +124,11 @@ if (isset($_POST['action'])) {
 }
 
 $user = current_user();
+$require_login = $config['require_login'] ?? false;
+if ($require_login && !$user) {
+    header('Location: index.php');
+    exit;
+}
 $edit_mode = $_SESSION['edit_mode'] ?? false;
 
 $series_id = $_GET['id'] ?? $_POST['series_id'] ?? null;

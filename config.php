@@ -6,6 +6,9 @@ return [
     // Default language for the UI
     'language' => 'en',
 
+    // If true, all pages require authentication to view
+    'require_login' => false,
+
     // Database configuration. Driver can be switched later (e.g. mysql).
     'db' => [
         'driver' => 'sqlite',

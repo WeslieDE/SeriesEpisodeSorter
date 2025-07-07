@@ -38,6 +38,7 @@ if (isset($_POST['action'])) {
                 $data = [
                     'site_title' => $_POST['site_title'] ?? '',
                     'language' => $_POST['language'] ?? 'en',
+                    'require_login' => !empty($_POST['require_login']),
                     'db' => [
                         'driver' => $_POST['db_driver'] ?? 'sqlite',
                         'sqlite' => $_POST['db_sqlite'] ?? '',
@@ -103,6 +104,10 @@ if (isset($_POST['action'])) {
   <div class="mb-3">
     <label class="form-label">Language</label>
     <input name="language" class="form-control" value="<?= htmlspecialchars($config['language']) ?>">
+  </div>
+  <div class="form-check mb-3">
+    <input class="form-check-input" type="checkbox" id="require_login" name="require_login" value="1" <?= ($config['require_login'] ?? false) ? 'checked' : '' ?>>
+    <label class="form-check-label" for="require_login">Require login for all pages</label>
   </div>
   <h4>Database</h4>
   <div class="mb-3">
