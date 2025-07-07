@@ -1,22 +1,19 @@
 <?php
 $config = require __DIR__ . '/../config.php';
 
-require_once __DIR__ . '/../src/db.php';
-$pdo = Database::getConnection();
+require_once __DIR__ . '/../src/DataAccess.php';
+$db = new DataAccess();
 
 session_start();
 
-function current_user() {
-    global $pdo;
+function current_user(DataAccess $db) {
     if (!empty($_SESSION['user_id'])) {
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
-        $stmt->execute([$_SESSION['user_id']]);
-        return $stmt->fetch();
+        return $db->getUserById((int)$_SESSION['user_id']);
     }
     return null;
 }
 
-$user = current_user();
+$user = current_user($db);
 if (!$user) {
     header('Location: index.php');
     exit;

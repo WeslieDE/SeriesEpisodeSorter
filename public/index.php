@@ -1,36 +1,18 @@
 <?php
 $config = require __DIR__ . '/../config.php';
 
-if ($config['db']['driver'] === 'sqlite') {
-    $dbFile = $config['db']['sqlite'];
-    if (!is_dir(dirname($dbFile))) {
-        mkdir(dirname($dbFile), 0777, true);
-    }
-    $newDb = !file_exists($dbFile);
-} else {
-    $newDb = false;
-}
-
-require_once __DIR__ . '/../src/db.php';
-$pdo = Database::getConnection();
-if ($newDb) {
-    require __DIR__ . '/../src/init_db.php';
-}
+require_once __DIR__ . '/../src/DataAccess.php';
+$db = new DataAccess();
 
 session_start();
 
-function user_count() {
-    global $pdo;
-    $stmt = $pdo->query('SELECT COUNT(*) as c FROM users');
-    return (int)$stmt->fetch()['c'];
+function user_count(DataAccess $db) {
+    return $db->userCount();
 }
 
-function current_user() {
-    global $pdo;
+function current_user(DataAccess $db) {
     if (!empty($_SESSION['user_id'])) {
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
-        $stmt->execute([$_SESSION['user_id']]);
-        return $stmt->fetch();
+        return $db->getUserById((int)$_SESSION['user_id']);
     }
     return null;
 }
@@ -40,21 +22,18 @@ $message = '';
 if (isset($_POST['action'])) {
     switch ($_POST['action']) {
         case 'register':
-            if (user_count() > 0) {
+            if (user_count($db) > 0) {
                 $message = 'Registration disabled.';
                 break;
             }
             if (!empty($_POST['username']) && !empty($_POST['password'])) {
-                $stmt = $pdo->prepare('INSERT INTO users(username, password_hash) VALUES(?, ?)');
-                $stmt->execute([$_POST['username'], password_hash($_POST['password'], PASSWORD_DEFAULT)]);
+                $db->insertUser($_POST['username'], password_hash($_POST['password'], PASSWORD_DEFAULT));
                 $message = 'Registered. You can login now.';
             }
             break;
         case 'login':
             if (!empty($_POST['username']) && !empty($_POST['password'])) {
-                $stmt = $pdo->prepare('SELECT * FROM users WHERE username = ?');
-                $stmt->execute([$_POST['username']]);
-                $user = $stmt->fetch();
+                $user = $db->getUserByUsername($_POST['username']);
                 if ($user && password_verify($_POST['password'], $user['password_hash'])) {
                     $_SESSION['user_id'] = $user['id'];
                 } else {
@@ -67,19 +46,18 @@ if (isset($_POST['action'])) {
             header('Location: index.php');
             exit;
         case 'add_series':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['title'])) {
-                    $stmt = $pdo->prepare('INSERT INTO series(title, description) VALUES(?, ?)');
-                    $stmt->execute([$_POST['title'], $_POST['description'] ?? null]);
+                    $db->insertSeries($_POST['title'], $_POST['description'] ?? null);
                 }
             }
             break;
     }
 }
 
-$user = current_user();
-$login_required = ($config['require_login'] ?? false) && !$user && user_count() > 0;
-$series = $login_required ? [] : $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
+$user = current_user($db);
+$login_required = ($config['require_login'] ?? false) && !$user && user_count($db) > 0;
+$series = $login_required ? [] : $db->getAllSeries();
 ?>
 <!DOCTYPE html>
 <html>
@@ -114,7 +92,7 @@ $series = $login_required ? [] : $pdo->query('SELECT * FROM series ORDER BY id D
     </div>
   </div>
 </nav>
-<?php if (!$user && user_count() == 0): ?>
+<?php if (!$user && user_count($db) == 0): ?>
 <div class="mb-3">
   <h2>Register</h2>
   <form method="post">
