@@ -10,7 +10,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS users (
 $pdo->exec("CREATE TABLE IF NOT EXISTS series (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
-    description TEXT
+    description TEXT,
+    cover TEXT
 );");
 $pdo->exec("CREATE TABLE IF NOT EXISTS episodes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

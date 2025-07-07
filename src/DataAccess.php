@@ -21,6 +21,12 @@ class DataAccess {
 
         if ($newDb) {
             require __DIR__ . '/init_db.php';
+        } else {
+            // ensure new columns exist when updating
+            $cols = $this->pdo->query("PRAGMA table_info(series)")->fetchAll(PDO::FETCH_COLUMN, 1);
+            if (!in_array('cover', $cols, true)) {
+                $this->pdo->exec("ALTER TABLE series ADD COLUMN cover TEXT");
+            }
         }
     }
 
@@ -52,9 +58,9 @@ class DataAccess {
         return $this->pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
     }
 
-    public function insertSeries(string $title, ?string $description): void {
-        $stmt = $this->pdo->prepare('INSERT INTO series(title, description) VALUES(?, ?)');
-        $stmt->execute([$title, $description]);
+    public function insertSeries(string $title, ?string $description, ?string $cover): void {
+        $stmt = $this->pdo->prepare('INSERT INTO series(title, description, cover) VALUES(?, ?, ?)');
+        $stmt->execute([$title, $description, $cover]);
     }
 
     public function getSeriesById(int $id) {
@@ -63,9 +69,14 @@ class DataAccess {
         return $stmt->fetch();
     }
 
-    public function updateSeries(int $id, string $title, ?string $description): void {
-        $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ? WHERE id = ?');
-        $stmt->execute([$title, $description, $id]);
+    public function updateSeries(int $id, string $title, ?string $description, ?string $cover = null): void {
+        if ($cover !== null) {
+            $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ?, cover = ? WHERE id = ?');
+            $stmt->execute([$title, $description, $cover, $id]);
+        } else {
+            $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ? WHERE id = ?');
+            $stmt->execute([$title, $description, $id]);
+        }
     }
 
     // Episode related

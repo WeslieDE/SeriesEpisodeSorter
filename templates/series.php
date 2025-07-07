@@ -1,5 +1,8 @@
 <div class="card mb-3">
   <div class="card-header"><h2><?= htmlspecialchars($series['title']) ?></h2></div>
+  <?php if ($series['cover']): ?>
+  <img src="<?= asset_url($series['cover']) ?>" class="card-img-top" loading="lazy" alt="cover">
+  <?php endif; ?>
   <div class="card-body">
     <p><?= nl2br(htmlspecialchars($series['description'])) ?></p>
     <?php if ($user): ?>
@@ -12,11 +15,12 @@
     </form>
     <?php if ($edit_mode): ?>
     <h4>Edit Series</h4>
-    <form method="post" class="mb-3">
+    <form method="post" class="mb-3" enctype="multipart/form-data">
         <input type="hidden" name="action" value="update_series">
         <input type="hidden" name="series_id" value="<?= $series['id'] ?>">
         <input name="title" value="<?= htmlspecialchars($series['title']) ?>" class="form-control mb-1">
         <textarea name="description" class="form-control mb-1"><?= htmlspecialchars($series['description']) ?></textarea>
+        <input type="file" name="cover" class="form-control mb-1">
         <button class="btn btn-primary">Save</button>
     </form>
     <h4>Add Episode</h4>
