@@ -96,7 +96,6 @@ $series = $pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
   <div class="container-fluid">
     <a class="navbar-brand" href="index.php"><?= htmlspecialchars($config['site_title']) ?></a>
     <div class="d-flex ms-auto">
-      <a class="btn btn-outline-primary me-2" href="view.php">Public View</a>
       <?php if ($user): ?>
       <a class="btn btn-outline-secondary me-2" href="favorites.php">Favorites</a>
       <a class="btn btn-outline-secondary me-2" href="config_page.php">Config</a>
