@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <link rel="manifest" href="/manifest.json">
 <title><?= htmlspecialchars($title ?? $config['site_title']) ?></title>
@@ -14,6 +14,6 @@
 <div class="alert alert-warning"><?= htmlspecialchars($message) ?></div>
 <?php endif; ?>
 <?= $content ?? '' ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/bootstrap.bundle.min.js"></script>
 </body>
 </html>
