@@ -20,3 +20,8 @@ function current_user() {
     }
     return null;
 }
+
+function asset_url(string $path): string {
+    $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+    return $base . '/' . ltrim($path, '/');
+}

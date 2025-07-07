@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link href="/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-<link rel="manifest" href="/manifest.json">
+<?php $baseUrl = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/'); ?>
+<link href="<?= $baseUrl ?>/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="<?= $baseUrl ?>/style.css">
+<link rel="manifest" href="<?= $baseUrl ?>/manifest.json">
 <title><?= htmlspecialchars($title ?? $config['site_title']) ?></title>
 </head>
 <body class="container py-4">
@@ -14,6 +15,6 @@
 <div class="alert alert-warning"><?= htmlspecialchars($message) ?></div>
 <?php endif; ?>
 <?= $content ?? '' ?>
-<script src="/bootstrap.bundle.min.js"></script>
+<script src="<?= $baseUrl ?>/bootstrap.bundle.min.js"></script>
 </body>
 </html>

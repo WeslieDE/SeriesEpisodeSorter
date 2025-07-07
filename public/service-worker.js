@@ -2,10 +2,10 @@ self.addEventListener('install', function(e) {
   e.waitUntil(
     caches.open('episode-sorter').then(function(cache) {
       return cache.addAll([
-        '/index.php',
-        '/bootstrap.min.css',
-        '/bootstrap.bundle.min.js',
-        '/Sortable.min.js'
+        './index.php',
+        './bootstrap.min.css',
+        './bootstrap.bundle.min.js',
+        './Sortable.min.js'
       ]);
     })
   );
