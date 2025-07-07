@@ -65,7 +65,6 @@ if (isset($_POST['action'])) {
             break;
     }
 }
-?>
 $content = template('config', ['config' => $config]);
 
 echo template('layout', [
