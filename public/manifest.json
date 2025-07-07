@@ -1,7 +1,7 @@
 {
     "name": "Series Episode Sorter",
     "short_name": "EpisodeSorter",
-    "start_url": "/index.php",
+    "start_url": "index.php",
     "display": "standalone",
     "background_color": "#ffffff",
     "theme_color": "#0d6efd",

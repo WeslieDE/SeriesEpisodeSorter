@@ -107,7 +107,7 @@
     ?>
   </div>
 </div>
-<script src="/Sortable.min.js"></script>
+<script src="<?= asset_url('Sortable.min.js') ?>"></script>
 <script>
 document.querySelectorAll('.episode-table tbody').forEach(function(tb){
   new Sortable(tb, {
