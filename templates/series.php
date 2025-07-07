@@ -95,6 +95,13 @@
             echo "</td>";
             if ($user):
                 echo "<td>";
+                if ($edit_mode) {
+                    echo '<form method="post" class="d-inline me-1" onsubmit="return confirm(\'Delete episode?\');">';
+                    echo "<input type='hidden' name='action' value='delete_episode'>";
+                    echo "<input type='hidden' name='episode_id' value='" . $e['id'] . "'>";
+                    echo "<button class='btn btn-sm btn-danger'>Delete</button>";
+                    echo "</form>";
+                }
                 if ($e['watched']):
                     echo "<span class=\"badge bg-success me-1\">Watched</span>";
                     echo "<form method=\"post\" class=\"d-inline\">";
