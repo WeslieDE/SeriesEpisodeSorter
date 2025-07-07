@@ -120,6 +120,17 @@ if (isset($_POST['action'])) {
                 }
             }
             break;
+        case 'update_episode':
+            if ($u = current_user()) {
+                if (!empty($_POST['episode_id'])) {
+                    $stmt = $pdo->prepare('UPDATE episodes SET title = ? WHERE id = ?');
+                    $stmt->execute([
+                        $_POST['title'] ?? '',
+                        $_POST['episode_id']
+                    ]);
+                }
+            }
+            break;
     }
 }
 
@@ -267,7 +278,18 @@ function episodes_for_series($series_id) {
             echo "</form>";
             echo "</td>";
             echo "<td>" . htmlspecialchars($e['episode']) . "</td>";
-            echo "<td>" . htmlspecialchars($e['title']) . "</td>";
+            echo "<td>";
+            if ($edit_mode) {
+                echo "<form method='post' class='d-flex'>";
+                echo "<input type='hidden' name='action' value='update_episode'>";
+                echo "<input type='hidden' name='episode_id' value='" . $e['id'] . "'>";
+                echo "<input name='title' class='form-control form-control-sm' value='" . htmlspecialchars($e['title'], ENT_QUOTES) . "'>";
+                echo "<button class='btn btn-sm btn-primary ms-1'>Save</button>";
+                echo "</form>";
+            } else {
+                echo htmlspecialchars($e['title']);
+            }
+            echo "</td>";
             if ($user):
                 echo "<td>";
                 if ($e['watched']):
