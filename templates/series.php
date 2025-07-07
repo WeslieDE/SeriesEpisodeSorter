@@ -107,7 +107,7 @@
     ?>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="/Sortable.min.js"></script>
 <script>
 document.querySelectorAll('.episode-table tbody').forEach(function(tb){
   new Sortable(tb, {

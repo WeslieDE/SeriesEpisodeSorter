@@ -3,8 +3,9 @@ self.addEventListener('install', function(e) {
     caches.open('episode-sorter').then(function(cache) {
       return cache.addAll([
         '/index.php',
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css',
-        'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js'
+        '/bootstrap.min.css',
+        '/bootstrap.bundle.min.js',
+        '/Sortable.min.js'
       ]);
     })
   );

@@ -26,7 +26,7 @@
   <?php endforeach; ?>
   </tbody>
 </table>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script src="/Sortable.min.js"></script>
 <script>
 var tb = document.querySelector('.episode-table tbody');
 if (tb) {
