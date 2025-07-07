@@ -90,8 +90,18 @@ if (isset($_POST['action'])) {
                     $stmt->execute([$u['id']]);
                     $max = (int)$stmt->fetchColumn();
                     $rating = $max + 1;
-                    $stmt = $pdo->prepare('REPLACE INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 1, ?, ?, 0)');
-                    $stmt->execute([$u['id'], $_POST['episode_id'], $rating, $_POST['comment'] ?? null]);
+
+                    $check = $pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
+                    $check->execute([$u['id'], $_POST['episode_id']]);
+                    $fav = $check->fetchColumn();
+
+                    if ($fav === false) {
+                        $ins = $pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 1, ?, ?, 0)');
+                        $ins->execute([$u['id'], $_POST['episode_id'], $rating, $_POST['comment'] ?? null]);
+                    } else {
+                        $upd = $pdo->prepare('UPDATE watched SET watched = 1, rating = ?, comment = ? WHERE user_id = ? AND episode_id = ?');
+                        $upd->execute([$rating, $_POST['comment'] ?? null, $u['id'], $_POST['episode_id']]);
+                    }
                }
            }
            break;
