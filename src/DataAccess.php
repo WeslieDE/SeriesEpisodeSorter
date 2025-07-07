@@ -125,7 +125,7 @@ class DataAccess {
             return; // nothing to update
         }
 
-        $upd = $this->pdo->prepare('UPDATE watched SET watched = 0, rating = NULL, comment = NULL WHERE user_id = ? AND episode_id = ?');
+        $upd = $this->pdo->prepare('UPDATE watched SET watched = 0, comment = NULL WHERE user_id = ? AND episode_id = ?');
         $upd->execute([$userId, $episodeId]);
     }
 
