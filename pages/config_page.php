@@ -37,6 +37,7 @@ if (isset($_POST['action'])) {
                     $message = 'Invalid API keys JSON: ' . json_last_error_msg();
                     break;
                 }
+                $apiData['omdb'] = $_POST['omdb_api_key'] ?? '';
                 $data['api_keys'] = $apiData;
 
                 $php = "<?php\nreturn " . var_export($data, true) . ";\n";
