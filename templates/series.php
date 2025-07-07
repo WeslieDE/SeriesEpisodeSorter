@@ -84,7 +84,7 @@
                 echo "<form method='post' class='d-flex'>";
                 echo "<input type='hidden' name='action' value='update_episode'>";
                 echo "<input type='hidden' name='episode_id' value='" . $e['id'] . "'>";
-                echo "<input name='title' class='form-control form-control-sm' value='" . htmlspecialchars($e['title'], ENT_QUOTES) . "'>";
+                echo "<input name='title' class='form-control form-control-sm flex-grow-1' value='" . htmlspecialchars($e['title'], ENT_QUOTES) . "'>";
                 echo "<button class='btn btn-sm btn-primary ms-1'>Save</button>";
                 echo "</form>";
             } else {
