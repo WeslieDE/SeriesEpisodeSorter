@@ -4,6 +4,39 @@
 
 $message = '';
 
+function process_cover_upload(?array $file): ?string {
+    if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
+        return null;
+    }
+    if (!is_dir(__DIR__ . '/../public/covers')) {
+        mkdir(__DIR__ . '/../public/covers', 0777, true);
+    }
+    $data = file_get_contents($file['tmp_name']);
+    if ($data === false) {
+        return null;
+    }
+    $im = @imagecreatefromstring($data);
+    if (!$im) {
+        return null;
+    }
+    $w = imagesx($im);
+    $h = imagesy($im);
+    $max = 1024;
+    if ($w > $max || $h > $max) {
+        $ratio = min($max / $w, $max / $h);
+        $nw = (int)($w * $ratio);
+        $nh = (int)($h * $ratio);
+        $res = imagecreatetruecolor($nw, $nh);
+        imagecopyresampled($res, $im, 0, 0, 0, 0, $nw, $nh, $w, $h);
+        imagedestroy($im);
+        $im = $res;
+    }
+    $name = 'covers/' . uniqid('cover_', true) . '.jpg';
+    imagejpeg($im, __DIR__ . '/../public/' . $name, 85);
+    imagedestroy($im);
+    return $name;
+}
+
 if (isset($_POST['action'])) {
     switch ($_POST['action']) {
         case 'register':
@@ -33,7 +66,8 @@ if (isset($_POST['action'])) {
         case 'add_series':
             if ($u = current_user()) {
                 if (!empty($_POST['title'])) {
-                    $db->insertSeries($_POST['title'], $_POST['description'] ?? null);
+                    $cover = process_cover_upload($_FILES['cover'] ?? null);
+                    $db->insertSeries($_POST['title'], $_POST['description'] ?? null, $cover);
                 }
             }
             break;
