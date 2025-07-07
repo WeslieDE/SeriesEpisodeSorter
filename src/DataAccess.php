@@ -103,21 +103,16 @@ class DataAccess {
 
     // Watched/favorites
     public function markWatched(int $userId, int $episodeId, ?string $comment): void {
-        $stmt = $this->pdo->prepare('SELECT MAX(rating) FROM watched WHERE user_id = ?');
-        $stmt->execute([$userId]);
-        $max = (int)$stmt->fetchColumn();
-        $rating = $max + 1;
-
-        $check = $this->pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
+        $check = $this->pdo->prepare('SELECT favorite, rating FROM watched WHERE user_id = ? AND episode_id = ?');
         $check->execute([$userId, $episodeId]);
-        $fav = $check->fetchColumn();
+        $row = $check->fetch();
 
-        if ($fav === false) {
-            $ins = $this->pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 1, ?, ?, 0)');
-            $ins->execute([$userId, $episodeId, $rating, $comment]);
+        if ($row === false) {
+            $ins = $this->pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 1, NULL, ?, 0)');
+            $ins->execute([$userId, $episodeId, $comment]);
         } else {
-            $upd = $this->pdo->prepare('UPDATE watched SET watched = 1, rating = ?, comment = ? WHERE user_id = ? AND episode_id = ?');
-            $upd->execute([$rating, $comment, $userId, $episodeId]);
+            $upd = $this->pdo->prepare('UPDATE watched SET watched = 1, comment = ? WHERE user_id = ? AND episode_id = ?');
+            $upd->execute([$comment, $userId, $episodeId]);
         }
     }
 
@@ -130,7 +125,7 @@ class DataAccess {
             return; // nothing to update
         }
 
-        $upd = $this->pdo->prepare('UPDATE watched SET watched = 0, rating = NULL, comment = NULL WHERE user_id = ? AND episode_id = ?');
+        $upd = $this->pdo->prepare('UPDATE watched SET watched = 0, comment = NULL WHERE user_id = ? AND episode_id = ?');
         $upd->execute([$userId, $episodeId]);
     }
 
