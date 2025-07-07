@@ -26,14 +26,8 @@ if (isset($_POST['action'])) {
                     'language' => $_POST['language'] ?? 'en',
                     'require_login' => !empty($_POST['require_login']),
                     'db' => [
-                        'driver' => $_POST['db_driver'] ?? 'sqlite',
+                        'driver' => 'sqlite',
                         'sqlite' => $_POST['db_sqlite'] ?? '',
-                        'mysql' => [
-                            'host' => $_POST['db_mysql_host'] ?? 'localhost',
-                            'dbname' => $_POST['db_mysql_dbname'] ?? 'series',
-                            'user' => $_POST['db_mysql_user'] ?? 'user',
-                            'pass' => $_POST['db_mysql_pass'] ?? 'pass',
-                        ],
                     ],
                     'api_keys' => [],
                 ];

@@ -15,32 +15,8 @@
   </div>
   <h4>Database</h4>
   <div class="mb-3">
-    <label class="form-label">Driver</label>
-    <select name="db_driver" class="form-select">
-      <?php foreach(['sqlite','mysql'] as $d): ?>
-      <option value="<?= $d ?>" <?= $config['db']['driver'] === $d ? 'selected' : '' ?>><?= ucfirst($d) ?></option>
-      <?php endforeach; ?>
-    </select>
-  </div>
-  <div class="mb-3">
     <label class="form-label">SQLite Path</label>
     <input name="db_sqlite" class="form-control" value="<?= htmlspecialchars($config['db']['sqlite']) ?>">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">MySQL Host</label>
-    <input name="db_mysql_host" class="form-control" value="<?= htmlspecialchars($config['db']['mysql']['host']) ?>">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">MySQL Database</label>
-    <input name="db_mysql_dbname" class="form-control" value="<?= htmlspecialchars($config['db']['mysql']['dbname']) ?>">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">MySQL User</label>
-    <input name="db_mysql_user" class="form-control" value="<?= htmlspecialchars($config['db']['mysql']['user']) ?>">
-  </div>
-  <div class="mb-3">
-    <label class="form-label">MySQL Password</label>
-    <input name="db_mysql_pass" class="form-control" value="<?= htmlspecialchars($config['db']['mysql']['pass']) ?>">
   </div>
   <h4>API Keys (JSON)</h4>
   <div class="mb-3">

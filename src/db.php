@@ -11,19 +11,6 @@ class Database {
                     $dsn = 'sqlite:' . $config['db']['sqlite'];
                     self::$instance = new PDO($dsn, null, null, self::opts());
                     break;
-                case 'mysql':
-                    $dsn = sprintf(
-                        'mysql:host=%s;dbname=%s;charset=utf8mb4',
-                        $config['db']['mysql']['host'],
-                        $config['db']['mysql']['dbname']
-                    );
-                    self::$instance = new PDO(
-                        $dsn,
-                        $config['db']['mysql']['user'],
-                        $config['db']['mysql']['pass'],
-                        self::opts()
-                    );
-                    break;
                 default:
                     throw new Exception('Unsupported DB driver');
             }

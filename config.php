@@ -9,16 +9,10 @@ return [
     // If true, all pages require authentication to view
     'require_login' => false,
 
-    // Database configuration. Driver can be switched later (e.g. mysql).
+    // Database configuration (SQLite only)
     'db' => [
         'driver' => 'sqlite',
         'sqlite' => __DIR__ . '/data/app.db',
-        'mysql' => [
-            'host' => 'localhost',
-            'dbname' => 'series',
-            'user' => 'user',
-            'pass' => 'pass',
-        ],
     ],
 
     // API keys for external services can be placed here
