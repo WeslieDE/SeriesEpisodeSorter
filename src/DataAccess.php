@@ -178,5 +178,12 @@ class DataAccess {
         $stmt = $this->pdo->prepare('DELETE FROM episodes WHERE series_id = ?');
         $stmt->execute([$seriesId]);
     }
+
+    public function deleteEpisode(int $episodeId): void {
+        $stmt = $this->pdo->prepare('DELETE FROM watched WHERE episode_id = ?');
+        $stmt->execute([$episodeId]);
+        $stmt = $this->pdo->prepare('DELETE FROM episodes WHERE id = ?');
+        $stmt->execute([$episodeId]);
+    }
 }
 ?>

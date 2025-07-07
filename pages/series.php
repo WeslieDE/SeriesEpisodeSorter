@@ -166,6 +166,13 @@ if (isset($_POST['action'])) {
                 }
             }
             break;
+        case 'delete_episode':
+            if ($u = current_user()) {
+                if (!empty($_POST['episode_id'])) {
+                    $db->deleteEpisode((int)$_POST['episode_id']);
+                }
+            }
+            break;
     }
 }
 
