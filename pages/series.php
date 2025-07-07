@@ -40,6 +40,63 @@ function process_cover_upload(?array $file): ?string {
     return $name;
 }
 
+function download_cover(string $url): ?string {
+    $data = @file_get_contents($url);
+    if ($data === false) {
+        return null;
+    }
+    $tmp = tmpfile();
+    if (!$tmp) {
+        return null;
+    }
+    $meta = stream_get_meta_data($tmp);
+    file_put_contents($meta['uri'], $data);
+    $name = process_cover_upload(['tmp_name' => $meta['uri'], 'error' => UPLOAD_ERR_OK]);
+    fclose($tmp);
+    return $name;
+}
+
+function import_from_imdb(int $seriesId, string $imdbId): string {
+    global $db, $config;
+    $apiKey = $config['api_keys']['omdb'] ?? '';
+    if ($apiKey === '') {
+        return 'OMDb API key missing in config.';
+    }
+    $base = 'http://www.omdbapi.com/?apikey=' . urlencode($apiKey) . '&i=' . urlencode($imdbId);
+    $json = @file_get_contents($base);
+    if ($json === false) {
+        return 'Failed to fetch series info.';
+    }
+    $info = json_decode($json, true);
+    if (!$info || ($info['Response'] ?? 'False') !== 'True') {
+        return $info['Error'] ?? 'Invalid response from OMDb.';
+    }
+
+    // Update cover if provided
+    if (!empty($info['Poster']) && strpos($info['Poster'], 'http') === 0) {
+        if ($cover = download_cover($info['Poster'])) {
+            $db->updateSeries($seriesId, $info['Title'] ?? '', $info['Plot'] ?? null, $cover, $imdbId);
+        } else {
+            $db->updateSeries($seriesId, $info['Title'] ?? '', $info['Plot'] ?? null, null, $imdbId);
+        }
+    } else {
+        $db->updateSeries($seriesId, $info['Title'] ?? '', $info['Plot'] ?? null, null, $imdbId);
+    }
+
+    $db->deleteEpisodesForSeries($seriesId);
+    for ($season = 1; ; $season++) {
+        $seasonJson = @file_get_contents($base . '&Season=' . $season);
+        $sinfo = $seasonJson ? json_decode($seasonJson, true) : null;
+        if (!$sinfo || ($sinfo['Response'] ?? 'False') !== 'True') {
+            break;
+        }
+        foreach ($sinfo['Episodes'] as $ep) {
+            $db->insertEpisode($seriesId, $season, (int)$ep['Episode'], $ep['Title']);
+        }
+    }
+    return 'Imported from IMDb.';
+}
+
 if (isset($_POST['action'])) {
     switch ($_POST['action']) {
         case 'logout':
@@ -53,7 +110,7 @@ if (isset($_POST['action'])) {
             if ($u = current_user()) {
                 if (!empty($_POST['series_id']) && !empty($_POST['title'])) {
                     $cover = process_cover_upload($_FILES['cover'] ?? null);
-                    $db->updateSeries((int)$_POST['series_id'], $_POST['title'], $_POST['description'] ?? null, $cover);
+                    $db->updateSeries((int)$_POST['series_id'], $_POST['title'], $_POST['description'] ?? null, $cover, $_POST['imdb_id'] ?? null);
                 }
             }
             break;
@@ -71,6 +128,13 @@ if (isset($_POST['action'])) {
                     $season = (int)$_POST['season'];
                     $count = max(0, (int)$_POST['count']);
                     $db->bulkAddEpisodes($seriesId, $season, $count);
+                }
+            }
+            break;
+        case 'import_imdb':
+            if ($u = current_user()) {
+                if (!empty($_POST['series_id']) && !empty($_POST['imdb_id'])) {
+                    $message = import_from_imdb((int)$_POST['series_id'], trim($_POST['imdb_id']));
                 }
             }
             break;

@@ -67,7 +67,7 @@ if (isset($_POST['action'])) {
             if ($u = current_user()) {
                 if (!empty($_POST['title'])) {
                     $cover = process_cover_upload($_FILES['cover'] ?? null);
-                    $db->insertSeries($_POST['title'], $_POST['description'] ?? null, $cover);
+                    $db->insertSeries($_POST['title'], $_POST['description'] ?? null, $cover, $_POST['imdb_id'] ?? null);
                 }
             }
             break;

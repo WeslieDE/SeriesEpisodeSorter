@@ -27,6 +27,9 @@ class DataAccess {
             if (!in_array('cover', $cols, true)) {
                 $this->pdo->exec("ALTER TABLE series ADD COLUMN cover TEXT");
             }
+            if (!in_array('imdb_id', $cols, true)) {
+                $this->pdo->exec("ALTER TABLE series ADD COLUMN imdb_id TEXT");
+            }
         }
     }
 
@@ -58,9 +61,9 @@ class DataAccess {
         return $this->pdo->query('SELECT * FROM series ORDER BY id DESC')->fetchAll();
     }
 
-    public function insertSeries(string $title, ?string $description, ?string $cover): void {
-        $stmt = $this->pdo->prepare('INSERT INTO series(title, description, cover) VALUES(?, ?, ?)');
-        $stmt->execute([$title, $description, $cover]);
+    public function insertSeries(string $title, ?string $description, ?string $cover, ?string $imdbId): void {
+        $stmt = $this->pdo->prepare('INSERT INTO series(title, description, cover, imdb_id) VALUES(?, ?, ?, ?)');
+        $stmt->execute([$title, $description, $cover, $imdbId]);
     }
 
     public function getSeriesById(int $id) {
@@ -69,13 +72,13 @@ class DataAccess {
         return $stmt->fetch();
     }
 
-    public function updateSeries(int $id, string $title, ?string $description, ?string $cover = null): void {
+    public function updateSeries(int $id, string $title, ?string $description, ?string $cover = null, ?string $imdbId = null): void {
         if ($cover !== null) {
-            $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ?, cover = ? WHERE id = ?');
-            $stmt->execute([$title, $description, $cover, $id]);
+            $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ?, cover = ?, imdb_id = COALESCE(?, imdb_id) WHERE id = ?');
+            $stmt->execute([$title, $description, $cover, $imdbId, $id]);
         } else {
-            $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ? WHERE id = ?');
-            $stmt->execute([$title, $description, $id]);
+            $stmt = $this->pdo->prepare('UPDATE series SET title = ?, description = ?, imdb_id = COALESCE(?, imdb_id) WHERE id = ?');
+            $stmt->execute([$title, $description, $imdbId, $id]);
         }
     }
 
@@ -169,6 +172,11 @@ class DataAccess {
                 $ins->execute([$userId, $eid, $idx + 1]);
             }
         }
+    }
+
+    public function deleteEpisodesForSeries(int $seriesId): void {
+        $stmt = $this->pdo->prepare('DELETE FROM episodes WHERE series_id = ?');
+        $stmt->execute([$seriesId]);
     }
 }
 ?>

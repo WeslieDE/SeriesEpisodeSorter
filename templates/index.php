@@ -18,6 +18,7 @@
     <input type="hidden" name="action" value="add_series">
     <input name="title" placeholder="Title" class="form-control mb-1">
     <textarea name="description" placeholder="Description" class="form-control mb-1"></textarea>
+    <input name="imdb_id" placeholder="IMDb ID" class="form-control mb-1">
     <input type="file" name="cover" class="form-control mb-1">
     <button class="btn btn-success">Add Series</button>
 </form>
