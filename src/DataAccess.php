@@ -122,8 +122,16 @@ class DataAccess {
     }
 
     public function markUnwatched(int $userId, int $episodeId): void {
-        $stmt = $this->pdo->prepare('DELETE FROM watched WHERE user_id = ? AND episode_id = ?');
+        $stmt = $this->pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
         $stmt->execute([$userId, $episodeId]);
+        $fav = $stmt->fetchColumn();
+
+        if ($fav === false) {
+            return; // nothing to update
+        }
+
+        $upd = $this->pdo->prepare('UPDATE watched SET watched = 0, rating = NULL, comment = NULL WHERE user_id = ? AND episode_id = ?');
+        $upd->execute([$userId, $episodeId]);
     }
 
     public function toggleFavorite(int $userId, int $episodeId): void {
