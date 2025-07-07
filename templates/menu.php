@@ -3,8 +3,8 @@
     <a class="navbar-brand" href="index.php"><?= htmlspecialchars($config['site_title']) ?></a>
     <div class="d-flex ms-auto">
       <?php if (!empty($user)): ?>
-      <a class="btn btn-outline-secondary me-2" href="favorites.php">Favorites</a>
-      <a class="btn btn-outline-secondary me-2" href="config_page.php">Config</a>
+      <a class="btn btn-outline-secondary me-2" href="index.php?page=favorites">Favorites</a>
+      <a class="btn btn-outline-secondary me-2" href="index.php?page=config">Config</a>
       <form method="post" action="index.php" class="d-flex">
         <input type="hidden" name="action" value="logout">
         <button class="btn btn-secondary">Logout</button>

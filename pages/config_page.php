@@ -1,20 +1,8 @@
 <?php
-$config = require __DIR__ . '/../config.php';
 
-require_once __DIR__ . '/../src/DataAccess.php';
-require_once __DIR__ . '/../src/Template.php';
-$db = new DataAccess();
+// expects $config, $db and helper functions from bootstrap
 
-session_start();
-
-function current_user(DataAccess $db) {
-    if (!empty($_SESSION['user_id'])) {
-        return $db->getUserById((int)$_SESSION['user_id']);
-    }
-    return null;
-}
-
-$user = current_user($db);
+$user = current_user();
 if (!$user) {
     header('Location: index.php');
     exit;

@@ -1,19 +1,8 @@
 <?php
-$config = require __DIR__ . '/../config.php';
-require_once __DIR__ . '/../src/DataAccess.php';
-require_once __DIR__ . '/../src/Template.php';
-$db = new DataAccess();
 
-session_start();
+// expects $config, $db and helper functions from bootstrap
 
-function current_user(DataAccess $db) {
-    if (!empty($_SESSION['user_id'])) {
-        return $db->getUserById((int)$_SESSION['user_id']);
-    }
-    return null;
-}
-
-$user = current_user($db);
+$user = current_user();
 if (!$user) {
     header('Location: index.php');
     exit;
@@ -22,7 +11,7 @@ if (!$user) {
 $message = '';
 if (isset($_POST['action']) && $_POST['action'] === 'toggle_favorite' && !empty($_POST['episode_id'])) {
     $db->toggleFavorite($user['id'], (int)$_POST['episode_id']);
-    header('Location: favorites.php');
+    header('Location: index.php?page=favorites');
     exit;
 }
 
