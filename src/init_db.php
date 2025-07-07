@@ -11,7 +11,8 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS series (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     title TEXT NOT NULL,
     description TEXT,
-    cover TEXT
+    cover TEXT,
+    imdb_id TEXT
 );");
 $pdo->exec("CREATE TABLE IF NOT EXISTS episodes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

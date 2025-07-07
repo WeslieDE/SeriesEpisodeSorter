@@ -23,6 +23,7 @@ return [
 
     // API keys for external services can be placed here
     'api_keys' => [
-        // 'example_service' => 'your-api-key'
+        // OMDb API key used for IMDb imports
+        'omdb' => ''
     ],
 ];

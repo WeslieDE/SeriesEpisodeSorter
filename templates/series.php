@@ -20,8 +20,16 @@
         <input type="hidden" name="series_id" value="<?= $series['id'] ?>">
         <input name="title" value="<?= htmlspecialchars($series['title']) ?>" class="form-control mb-1">
         <textarea name="description" class="form-control mb-1"><?= htmlspecialchars($series['description']) ?></textarea>
+        <input name="imdb_id" value="<?= htmlspecialchars($series['imdb_id'] ?? '') ?>" placeholder="IMDb ID" class="form-control mb-1">
         <input type="file" name="cover" class="form-control mb-1">
         <button class="btn btn-primary">Save</button>
+    </form>
+    <h4>Import from IMDb</h4>
+    <form method="post" class="mb-3">
+        <input type="hidden" name="action" value="import_imdb">
+        <input type="hidden" name="series_id" value="<?= $series['id'] ?>">
+        <input name="imdb_id" placeholder="IMDb ID" class="form-control mb-1">
+        <button class="btn btn-warning">Import</button>
     </form>
     <h4>Add Episode</h4>
     <form method="post" class="mb-3">
