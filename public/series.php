@@ -1,32 +1,17 @@
 <?php
 $config = require __DIR__ . '/../config.php';
 
-if ($config['db']['driver'] === 'sqlite') {
-    $dbFile = $config['db']['sqlite'];
-    if (!is_dir(dirname($dbFile))) {
-        mkdir(dirname($dbFile), 0777, true);
-    }
-    $newDb = !file_exists($dbFile);
-} else {
-    $newDb = false;
-}
-require_once __DIR__ . '/../src/db.php';
-$pdo = Database::getConnection();
-if ($newDb) {
-    require __DIR__ . '/../src/init_db.php';
-}
+require_once __DIR__ . '/../src/DataAccess.php';
+$db = new DataAccess();
 
 session_start();
 if (!isset($_SESSION['edit_mode'])) {
     $_SESSION['edit_mode'] = false;
 }
 
-function current_user() {
-    global $pdo;
+function current_user(DataAccess $db) {
     if (!empty($_SESSION['user_id'])) {
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
-        $stmt->execute([$_SESSION['user_id']]);
-        return $stmt->fetch();
+        return $db->getUserById((int)$_SESSION['user_id']);
     }
     return null;
 }
@@ -43,108 +28,61 @@ if (isset($_POST['action'])) {
             $_SESSION['edit_mode'] = !($_SESSION['edit_mode'] ?? false);
             break;
         case 'update_series':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['series_id']) && !empty($_POST['title'])) {
-                    $stmt = $pdo->prepare('UPDATE series SET title = ?, description = ? WHERE id = ?');
-                    $stmt->execute([
-                        $_POST['title'],
-                        $_POST['description'] ?? null,
-                        $_POST['series_id']
-                    ]);
+                    $db->updateSeries((int)$_POST['series_id'], $_POST['title'], $_POST['description'] ?? null);
                 }
             }
             break;
         case 'add_episode':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['series_id'])) {
-                    $stmt = $pdo->prepare('INSERT INTO episodes(series_id, season, episode, title) VALUES(?, ?, ?, ?)');
-                    $stmt->execute([
-                        $_POST['series_id'],
-                        $_POST['season'] ?? null,
-                        $_POST['episode'] ?? null,
-                        $_POST['title'] ?? ''
-                    ]);
+                    $db->insertEpisode((int)$_POST['series_id'], $_POST['season'] !== '' ? (int)$_POST['season'] : null, $_POST['episode'] !== '' ? (int)$_POST['episode'] : null, $_POST['title'] ?? '');
                 }
             }
             break;
         case 'bulk_add_episodes':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['series_id']) && isset($_POST['season']) && isset($_POST['count'])) {
                     $seriesId = (int)$_POST['series_id'];
                     $season = (int)$_POST['season'];
                     $count = max(0, (int)$_POST['count']);
-                    $stmt = $pdo->prepare('SELECT MAX(episode) FROM episodes WHERE series_id = ? AND season = ?');
-                    $stmt->execute([$seriesId, $season]);
-                    $start = (int)$stmt->fetchColumn() + 1;
-                    $ins = $pdo->prepare('INSERT INTO episodes(series_id, season, episode, title) VALUES(?, ?, ?, ?)');
-                    for ($i = 0; $i < $count; $i++) {
-                        $ins->execute([$seriesId, $season, $start + $i, '']);
-                    }
+                    $db->bulkAddEpisodes($seriesId, $season, $count);
                 }
             }
             break;
        case 'mark_watched':
-           if ($u = current_user()) {
+           if ($u = current_user($db)) {
                if (!empty($_POST['episode_id'])) {
-                    $stmt = $pdo->prepare('SELECT MAX(rating) FROM watched WHERE user_id = ?');
-                    $stmt->execute([$u['id']]);
-                    $max = (int)$stmt->fetchColumn();
-                    $rating = $max + 1;
-
-                    $check = $pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
-                    $check->execute([$u['id'], $_POST['episode_id']]);
-                    $fav = $check->fetchColumn();
-
-                    if ($fav === false) {
-                        $ins = $pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 1, ?, ?, 0)');
-                        $ins->execute([$u['id'], $_POST['episode_id'], $rating, $_POST['comment'] ?? null]);
-                    } else {
-                        $upd = $pdo->prepare('UPDATE watched SET watched = 1, rating = ?, comment = ? WHERE user_id = ? AND episode_id = ?');
-                        $upd->execute([$rating, $_POST['comment'] ?? null, $u['id'], $_POST['episode_id']]);
-                    }
+                    $db->markWatched($u['id'], (int)$_POST['episode_id'], $_POST['comment'] ?? null);
                }
            }
            break;
         case 'mark_unwatched':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['episode_id'])) {
-                    $stmt = $pdo->prepare('DELETE FROM watched WHERE user_id = ? AND episode_id = ?');
-                    $stmt->execute([$u['id'], $_POST['episode_id']]);
+                    $db->markUnwatched($u['id'], (int)$_POST['episode_id']);
                 }
             }
             break;
         case 'toggle_favorite':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['episode_id'])) {
-                    $stmt = $pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
-                    $stmt->execute([$u['id'], $_POST['episode_id']]);
-                    $fav = $stmt->fetchColumn();
-                    if ($fav === false) {
-                        $ins = $pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, comment, favorite) VALUES(?, ?, 0, NULL, NULL, 1)');
-                        $ins->execute([$u['id'], $_POST['episode_id']]);
-                    } else {
-                        $newFav = $fav ? 0 : 1;
-                        $upd = $pdo->prepare('UPDATE watched SET favorite = ? WHERE user_id = ? AND episode_id = ?');
-                        $upd->execute([$newFav, $u['id'], $_POST['episode_id']]);
-                    }
+                    $db->toggleFavorite($u['id'], (int)$_POST['episode_id']);
                 }
             }
             break;
         case 'update_episode':
-            if ($u = current_user()) {
+            if ($u = current_user($db)) {
                 if (!empty($_POST['episode_id'])) {
-                    $stmt = $pdo->prepare('UPDATE episodes SET title = ? WHERE id = ?');
-                    $stmt->execute([
-                        $_POST['title'] ?? '',
-                        $_POST['episode_id']
-                    ]);
+                    $db->updateEpisodeTitle((int)$_POST['episode_id'], $_POST['title'] ?? '');
                 }
             }
             break;
     }
 }
 
-$user = current_user();
+$user = current_user($db);
 $require_login = $config['require_login'] ?? false;
 if ($require_login && !$user) {
     header('Location: index.php');
@@ -158,25 +96,15 @@ if (!$series_id) {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT * FROM series WHERE id = ?');
-$stmt->execute([$series_id]);
-$series = $stmt->fetch();
+$series = $db->getSeriesById((int)$series_id);
 if (!$series) {
     echo 'Series not found';
     exit;
 }
 
 function episodes_for_series_user($series_id, $uid) {
-    global $pdo;
-    $stmt = $pdo->prepare(
-        "SELECT e.*, IFNULL(w.watched,0) as watched, w.rating, w.comment, w.favorite
-         FROM episodes e LEFT JOIN watched w
-         ON e.id = w.episode_id AND w.user_id = ?
-         WHERE e.series_id = ?
-         ORDER BY e.season, CASE WHEN w.rating IS NOT NULL THEN w.rating ELSE e.episode END"
-    );
-    $stmt->execute([$uid, $series_id]);
-    return $stmt->fetchAll();
+    global $db;
+    return $db->getEpisodesForSeriesUser((int)$series_id, (int)$uid);
 }
 
 function episodes_for_series($series_id) {

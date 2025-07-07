@@ -1,21 +1,18 @@
 <?php
 $config = require __DIR__ . '/../config.php';
-require_once __DIR__ . '/../src/db.php';
-$pdo = Database::getConnection();
+require_once __DIR__ . '/../src/DataAccess.php';
+$db = new DataAccess();
 
 session_start();
 
-function current_user() {
-    global $pdo;
+function current_user(DataAccess $db) {
     if (!empty($_SESSION['user_id'])) {
-        $stmt = $pdo->prepare('SELECT * FROM users WHERE id = ?');
-        $stmt->execute([$_SESSION['user_id']]);
-        return $stmt->fetch();
+        return $db->getUserById((int)$_SESSION['user_id']);
     }
     return null;
 }
 
-$user = current_user();
+$user = current_user($db);
 if (!$user) {
     header('Location: index.php');
     exit;
@@ -23,24 +20,12 @@ if (!$user) {
 
 $message = '';
 if (isset($_POST['action']) && $_POST['action'] === 'toggle_favorite' && !empty($_POST['episode_id'])) {
-    $stmt = $pdo->prepare('SELECT favorite FROM watched WHERE user_id = ? AND episode_id = ?');
-    $stmt->execute([$user['id'], $_POST['episode_id']]);
-    $fav = $stmt->fetchColumn();
-    if ($fav === false) {
-        $ins = $pdo->prepare('INSERT INTO watched(user_id, episode_id, watched, rating, favorite) VALUES(?, ?, 0, NULL, 1)');
-        $ins->execute([$user['id'], $_POST['episode_id']]);
-    } else {
-        $newFav = $fav ? 0 : 1;
-        $upd = $pdo->prepare('UPDATE watched SET favorite = ? WHERE user_id = ? AND episode_id = ?');
-        $upd->execute([$newFav, $user['id'], $_POST['episode_id']]);
-    }
+    $db->toggleFavorite($user['id'], (int)$_POST['episode_id']);
     header('Location: favorites.php');
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT e.*, s.title AS series_title, w.rating FROM watched w JOIN episodes e ON w.episode_id = e.id JOIN series s ON e.series_id = s.id WHERE w.user_id = ? AND w.favorite = 1 ORDER BY w.rating');
-$stmt->execute([$user['id']]);
-$favorites = $stmt->fetchAll();
+$favorites = $db->getFavorites($user['id']);
 ?>
 <!DOCTYPE html>
 <html>
