@@ -204,7 +204,8 @@ $content = template('series', [
     'user' => $user,
     'edit_mode' => $edit_mode,
     'episodes' => $episodes,
-    'message' => $message
+    'message' => $message,
+    'config' => $config
 ]);
 
 echo template('layout', [
