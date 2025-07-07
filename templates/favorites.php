@@ -13,13 +13,13 @@
   <?php foreach ($favorites as $f): ?>
     <tr data-id="<?= $f['id'] ?>">
       <td>
-        <form method="post" action="favorites.php">
+        <form method="post" action="index.php?page=favorites">
           <input type="hidden" name="action" value="toggle_favorite">
           <input type="hidden" name="episode_id" value="<?= $f['id'] ?>">
           <button class="btn btn-link p-0 border-0" style="color:gold">&#9733;</button>
         </form>
       </td>
-      <td><a href="series.php?id=<?= $f['series_id'] ?>"><?= htmlspecialchars($f['series_title']) ?></a></td>
+      <td><a href="index.php?page=series&id=<?= $f['series_id'] ?>"><?= htmlspecialchars($f['series_title']) ?></a></td>
       <td><?= htmlspecialchars($f['season']) ?>x<?= htmlspecialchars($f['episode']) ?></td>
       <td><?= htmlspecialchars($f['title']) ?></td>
     </tr>
@@ -34,7 +34,7 @@ if (tb) {
     animation: 150,
     onEnd: function(){
       const order = Array.from(tb.children).map(tr => tr.dataset.id);
-      fetch('reorder.php', {
+      fetch('index.php?page=reorder', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({order})

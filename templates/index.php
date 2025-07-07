@@ -26,7 +26,7 @@
   <div class="card-header"><h3><?= htmlspecialchars($s['title']) ?></h3></div>
   <div class="card-body">
     <p><?= nl2br(htmlspecialchars($s['description'])) ?></p>
-    <a class="btn btn-primary" href="series.php?id=<?= $s['id'] ?>">View Episodes</a>
+    <a class="btn btn-primary" href="index.php?page=series&id=<?= $s['id'] ?>">View Episodes</a>
   </div>
 </div>
 <?php endforeach; ?>

@@ -1,9 +1,6 @@
 <?php
-$config = require __DIR__ . '/../config.php';
-require_once __DIR__ . '/../src/DataAccess.php';
-$db = new DataAccess();
 
-session_start();
+// expects $config, $db and helper functions from bootstrap
 header('Content-Type: application/json');
 $user_id = $_SESSION['user_id'] ?? 0;
 if (!$user_id) {

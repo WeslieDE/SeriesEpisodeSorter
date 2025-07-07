@@ -1,20 +1,8 @@
 <?php
-$config = require __DIR__ . '/../config.php';
 
-require_once __DIR__ . '/../src/DataAccess.php';
-require_once __DIR__ . '/../src/Template.php';
-$db = new DataAccess();
-
-session_start();
+// expects $config, $db and helper functions from bootstrap
 if (!isset($_SESSION['edit_mode'])) {
     $_SESSION['edit_mode'] = false;
-}
-
-function current_user(DataAccess $db) {
-    if (!empty($_SESSION['user_id'])) {
-        return $db->getUserById((int)$_SESSION['user_id']);
-    }
-    return null;
 }
 
 $message = '';
@@ -29,21 +17,21 @@ if (isset($_POST['action'])) {
             $_SESSION['edit_mode'] = !($_SESSION['edit_mode'] ?? false);
             break;
         case 'update_series':
-            if ($u = current_user($db)) {
+            if ($u = current_user()) {
                 if (!empty($_POST['series_id']) && !empty($_POST['title'])) {
                     $db->updateSeries((int)$_POST['series_id'], $_POST['title'], $_POST['description'] ?? null);
                 }
             }
             break;
         case 'add_episode':
-            if ($u = current_user($db)) {
+            if ($u = current_user()) {
                 if (!empty($_POST['series_id'])) {
                     $db->insertEpisode((int)$_POST['series_id'], $_POST['season'] !== '' ? (int)$_POST['season'] : null, $_POST['episode'] !== '' ? (int)$_POST['episode'] : null, $_POST['title'] ?? '');
                 }
             }
             break;
         case 'bulk_add_episodes':
-            if ($u = current_user($db)) {
+            if ($u = current_user()) {
                 if (!empty($_POST['series_id']) && isset($_POST['season']) && isset($_POST['count'])) {
                     $seriesId = (int)$_POST['series_id'];
                     $season = (int)$_POST['season'];
@@ -53,28 +41,28 @@ if (isset($_POST['action'])) {
             }
             break;
        case 'mark_watched':
-           if ($u = current_user($db)) {
+           if ($u = current_user()) {
                if (!empty($_POST['episode_id'])) {
                     $db->markWatched($u['id'], (int)$_POST['episode_id'], $_POST['comment'] ?? null);
                }
            }
            break;
         case 'mark_unwatched':
-            if ($u = current_user($db)) {
+            if ($u = current_user()) {
                 if (!empty($_POST['episode_id'])) {
                     $db->markUnwatched($u['id'], (int)$_POST['episode_id']);
                 }
             }
             break;
         case 'toggle_favorite':
-            if ($u = current_user($db)) {
+            if ($u = current_user()) {
                 if (!empty($_POST['episode_id'])) {
                     $db->toggleFavorite($u['id'], (int)$_POST['episode_id']);
                 }
             }
             break;
         case 'update_episode':
-            if ($u = current_user($db)) {
+            if ($u = current_user()) {
                 if (!empty($_POST['episode_id'])) {
                     $db->updateEpisodeTitle((int)$_POST['episode_id'], $_POST['title'] ?? '');
                 }
@@ -83,7 +71,7 @@ if (isset($_POST['action'])) {
     }
 }
 
-$user = current_user($db);
+$user = current_user();
 $require_login = $config['require_login'] ?? false;
 if ($require_login && !$user) {
     header('Location: index.php');

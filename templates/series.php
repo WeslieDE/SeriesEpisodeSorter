@@ -114,7 +114,7 @@ document.querySelectorAll('.episode-table tbody').forEach(function(tb){
     animation: 150,
     onEnd: function(){
       const order = Array.from(tb.children).map(tr => tr.dataset.id);
-      fetch('reorder.php', {
+      fetch('index.php?page=reorder', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({order})
